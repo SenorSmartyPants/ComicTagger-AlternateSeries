@@ -1,4 +1,11 @@
 #!/usr/bin/python
+import sys
+#using LSIO docker paths
+
+#something is weird with the path. Not finding the libs but this path is at the end of the path list
+#insert into the start of path and then script works
+sys.path.insert(0,'/app/mylar/lib')
+
 from comictaggerlib.settings import *
 from comictaggerlib.comicarchive import *
 
@@ -8,7 +15,7 @@ def main():
     utils.fix_output_encoding()
     settings = ComicTaggerSettings()
 
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print >> sys.stderr, "Usage: {0} [comicfile]".format(
             sys.argv[0])
         return
