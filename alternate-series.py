@@ -34,9 +34,15 @@ def main():
             filename + " is not a comic archive!"
         return
 
+    style = MetaDataStyle.CIX #ComicRack Style metadata
+
     if ca.hasMetadata( style ):
         md = ca.readMetadata( style )
         print "{0} #{1} ({2})".format(md.series, md.issue, md.year)
+
+        print "Title={0} SA={1}".format(md.title, md.storyArc)
+        print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
+        print "SG={0}".format(md.seriesGroup)
 
 
 if __name__ == '__main__':
