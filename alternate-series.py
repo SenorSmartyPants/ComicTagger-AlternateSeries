@@ -26,7 +26,9 @@ def main():
         print >> sys.stderr, filename + ": not found!"
         return
 
-    ca = ComicArchive(filename, settings)
+    #image path needed to start ComicArchive, not sure why.
+    #default image path is null in settings
+    ca = ComicArchive(filename, settings, "/app/mylar/lib/comictaggerlib/graphics/nocover.png")
     if not ca.seemsToBeAComicArchive():
         print >> sys.stderr, "Sorry, but " + \
             filename + " is not a comic archive!"
