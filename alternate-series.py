@@ -9,6 +9,7 @@ sys.path.insert(0,'/app/mylar/lib')
 from comictaggerlib.settings import *
 from comictaggerlib.comicarchive import *
 
+from titleparsing import *
 
 def main():
 
@@ -40,9 +41,32 @@ def main():
         md = ca.readMetadata( style )
         print "{0} #{1} ({2})".format(md.series, md.issue, md.year)
 
-        print "Title={0} SA={1}".format(md.title, md.storyArc)
+        print "Title={0}".format(md.title)
+        print "SA={0}".format(md.storyArc)
         print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
-        print "SG={0}".format(md.seriesGroup)
+
+        #move story arc to Alternate series
+        #then process for numbers
+        md.alternateSeries = md.storyArc
+        md.storyArc = None
+
+        if md.title is not None or md.alternateSeries is not None:
+            SingleStoryArcFromTitle(md)
+
+        print "SA={0}".format(md.storyArc)
+        print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
+
+        if ca.isZip():
+            print "is CBZ"
+
+        if ca.isWritable():
+            print "is writeable"
+        else:
+            print "is not writeable"
+
+
+        retcode = ca.writeMetadata(style, md)
+        print "writeMetadata return code is {0}".format(retcode)
 
 
 if __name__ == '__main__':
