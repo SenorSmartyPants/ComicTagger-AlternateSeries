@@ -29,7 +29,11 @@ def main():
 
     #image path needed to start ComicArchive, not sure why.
     #default image path is null in settings
-    ca = ComicArchive(filename, settings, "/app/mylar/lib/comictaggerlib/graphics/nocover.png")
+    ca = ComicArchive(
+        filename,
+        settings.rar_exe_path,
+        ComicTaggerSettings.getGraphic('nocover.png'))
+
     if not ca.seemsToBeAComicArchive():
         print >> sys.stderr, "Sorry, but " + \
             filename + " is not a comic archive!"
@@ -53,20 +57,18 @@ def main():
         if md.title is not None or md.alternateSeries is not None:
             SingleStoryArcFromTitle(md)
 
-        print "SA={0}".format(md.storyArc)
-        print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
+            if md.alternateNumber is None:
+                print "no alternate Number found"
 
-        if ca.isZip():
-            print "is CBZ"
+            print "---After Modifications---"
+            print "SA={0}".format(md.storyArc)
+            print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
 
-        if ca.isWritable():
-            print "is writeable"
-        else:
-            print "is not writeable"
-
-
-        retcode = ca.writeMetadata(style, md)
-        print "writeMetadata return code is {0}".format(retcode)
+            if not ca.writeMetadata(md, style):
+                print >> sys.stderr, "The tag save seemed to fail!"
+                return False
+            else:
+                print >> sys.stderr, "Save complete."
 
 
 if __name__ == '__main__':
