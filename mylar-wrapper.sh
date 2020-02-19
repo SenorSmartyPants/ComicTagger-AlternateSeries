@@ -1,2 +1,2 @@
 #!/bin/sh
-/app/mylar/comictagger.py -S /comics/ComicTagger-AlternateSeries/alternate-series.py "$4"
+/app/mylar/comictagger.py -S /storage/Comics/ComicTagger-AlternateSeries/alternate-series.py "$4"
