@@ -31,7 +31,7 @@ def SingleStoryArcFromTitleArray(titleArray):
 	else:
 		#only 1 book - remove part/chapter and everything after
 		storyarc = removeGroupKeywordsAndAfter(titleArray[0])
-		#MessageBox.Show(storyarc)
+		#print "Story Arc = {0}".format(storyarc)
 		#make sure story arc is not the same as the title
 		if storyarc == titleArray[0]:
 			storyarc = ""
@@ -56,7 +56,7 @@ def ProcessAlternateSeries(book,storyarc,overwrite):
 	if lAlternateSeries.find(lstoryarc) != -1 and lstoryarc != lAlternateSeries:
 		RemoveStoryArcFromAlternateSeries(book,storyarc,overwrite)
 	if lstoryarc != lAlternateSeries:
-		if overwrite or book.storyArc == "":
+		if overwrite or book.storyArc is None:
 			if len(storyarc) > 0:
 				book.storyArc = storyarc
 	else:
