@@ -51,8 +51,10 @@ def main():
 
         #move story arc to Alternate series
         #then process for numbers
-        md.alternateSeries = md.storyArc
-        md.storyArc = None
+        if md.alternateSeries is None:
+            #don't overwrite non empty alternate series
+            md.alternateSeries = md.storyArc
+            md.storyArc = None
 
         if md.title is not None or md.alternateSeries is not None:
             SingleStoryArcFromTitle(md)
