@@ -3,7 +3,7 @@
 # You are free to modify and distribute this file
 ##########################################################################
 	
-GroupKeywords = ["Part","Chapter",": ","Pt.","Pt"]
+GroupKeywords = ["Part","Chapter",": ","Pt.","Pt","Prelude","Conclusion"]
 
 NoStoryArcKey = "---***No Story Arc Found***---"
 StoryArcMinimumLength = 6 # seems to be off by one... 
