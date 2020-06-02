@@ -154,7 +154,7 @@ def makeTitleArray(books):
 		#print book.StoryArc
 		titleArray.append(book.title)
 	
-	print titleArray
+	print(titleArray)
 	
 	return titleArray		
 

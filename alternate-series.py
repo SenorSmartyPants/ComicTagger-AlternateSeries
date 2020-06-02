@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
-#using LSIO docker paths
+#using hotio docker paths
 
 #something is weird with the path. Not finding the libs but this path is at the end of the path list
 #insert into the start of path and then script works
-sys.path.insert(0,'/app/mylar/lib')
+sys.path.insert(0,'/app/lib')
 
 from comictaggerlib.settings import *
 from comictaggerlib.comicarchive import *
@@ -12,19 +12,16 @@ from comictaggerlib.comicarchive import *
 from titleparsing import *
 
 def main():
-
-    utils.fix_output_encoding()
     settings = ComicTaggerSettings()
 
     if len(sys.argv) < 2:
-        print >> sys.stderr, "Usage: {0} [comicfile]".format(
-            sys.argv[0])
+        print("Usage: {0} [comicfile]".format(sys.argv[0]), file=sys.stderr)
         return
 
     filename = sys.argv[1]
 
     if not os.path.exists(filename):
-        print >> sys.stderr, filename + ": not found!"
+        print(filename + ": not found!", file=sys.stderr)
         return
 
     #image path needed to start ComicArchive, not sure why.
@@ -35,20 +32,20 @@ def main():
         ComicTaggerSettings.getGraphic('nocover.png'))
 
     if not ca.seemsToBeAComicArchive():
-        print >> sys.stderr, "Sorry, but " + \
-            filename + " is not a comic archive!"
+        print("Sorry, but " + \
+            filename + " is not a comic archive!", file=sys.stderr)
         return
 
     style = MetaDataStyle.CIX #ComicRack Style metadata
 
     if ca.hasMetadata( style ):
         md = ca.readMetadata( style )
-        print "{0} #{1} ({2})".format(md.series, md.issue, md.year)
+        print("{0} #{1} ({2})".format(md.series, md.issue, md.year))
 
-        print "Title={0}".format(md.title)
-        print "SA={0}".format(md.storyArc)
-        print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
-
+        print("Title={0}".format(md.title))
+        print("SA={0}".format(md.storyArc))
+        print("AS={0} #{1}".format(md.alternateSeries, md.alternateNumber))
+        
         #move story arc to Alternate series
         #then process for numbers
         if md.alternateSeries is None:
@@ -60,18 +57,21 @@ def main():
             SingleStoryArcFromTitle(md)
 
             if md.alternateNumber is None:
-                print "no alternate Number found"
+                print("no alternate Number found")
 
-            print "---After Modifications---"
-            print "SA={0}".format(md.storyArc)
-            print "AS={0} #{1}".format(md.alternateSeries, md.alternateNumber)
+            print("---After Modifications---")
+            print("SA={0}".format(md.storyArc))
+            print("AS={0} #{1}".format(md.alternateSeries, md.alternateNumber))
 
             if not ca.writeMetadata(md, style):
-                print >> sys.stderr, "The tag save seemed to fail!"
+                print("The tag save seemed to fail!", file=sys.stderr)
                 return False
             else:
-                print >> sys.stderr, "Save complete."
+                print("Save complete.", file=sys.stderr)
+    
+    else:
+        print("Comic archive does not have metadata", file=sys.stderr)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__' or __name__ == 'alternate-series':
     main()
