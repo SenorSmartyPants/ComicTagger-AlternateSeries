@@ -281,8 +281,9 @@ def removePart(s,keyword):
 	
 def removeGroupKeywordsAndAfter(s):
 	processedString = s
-	for Part in GroupKeywords:
-		processedString = removePartAndAfter(processedString,Part)
+	if s is not None:
+		for Part in GroupKeywords:
+			processedString = removePartAndAfter(processedString,Part)
 	return processedString
 	
 def removePartAndAfter(s,keyword):
