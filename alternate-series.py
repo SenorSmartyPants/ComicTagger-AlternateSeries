@@ -12,7 +12,8 @@ from comictaggerlib.comicarchive import *
 from titleparsing import *
 
 def main():
-    settings = ComicTaggerSettings()
+    print(__name__)
+    settings = ComicTaggerSettings('/config/app/.ComicTagger')
 
     if len(sys.argv) < 2:
         print("Usage: {0} [comicfile]".format(sys.argv[0]), file=sys.stderr)
