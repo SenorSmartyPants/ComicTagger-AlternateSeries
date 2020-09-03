@@ -74,5 +74,5 @@ def main():
         print("Comic archive does not have metadata", file=sys.stderr)
 
 
-if __name__ == '__main__' or __name__ == 'alternate-series':
+if __name__ == '__main__':
     main()
