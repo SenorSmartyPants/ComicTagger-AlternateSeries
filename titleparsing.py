@@ -2,27 +2,21 @@
 # 
 # You are free to modify and distribute this file
 ##########################################################################
-	
-GroupKeywords = ["Part","Chapter",": ","Pt.","Pt","Prelude","Conclusion"]
-
 NoStoryArcKey = "---***No Story Arc Found***---"
 StoryArcMinimumLength = 6 # seems to be off by one... 
 SingleStoryArcMinimumLength = 2
 
-# from CR
-def SingleStoryArcFromTitle(metadata, overwrite = False):
-	#not books array
-	#just one metadata object
+import config
 
-	titleArray = []
-	titleArray.append(metadata.title)
-	storyarc = SingleStoryArcFromTitleArray(titleArray)
-	
-	if len(storyarc) != 0:
-		ProcessAlternateSeries(metadata,storyarc,overwrite)
-#end SingleStoryArcFromTitle
+def getGroupKeywords():
+	GroupKeywords = ["Part","Chapter","Pt.","Pt","Prelude","Conclusion"]
+	GroupKeywordColon = ": "
 
-	
+	if config.settings["GroupKeywordColon"] == 'True':
+		GroupKeywords.append(GroupKeywordColon)
+
+	return GroupKeywords
+
 def SingleStoryArcFromTitleArray(titleArray):
 	#test based on number of books selected
 	if len(titleArray) > 1:
@@ -38,54 +32,96 @@ def SingleStoryArcFromTitleArray(titleArray):
 	#endif
 	if len(storyarc) < SingleStoryArcMinimumLength:
 		storyarc = ""
-	
+
 	return storyArc_cleanup(storyarc)
 
+def InvertDictionary(dict):
+	inv = {}
+	for k, v in dict.items():
+		if k != NoStoryArcKey:
+			#print k
+			for title in v:
+				#print title
+				inv[title] = k
 
+	#print(inv)
+	return inv
 
+def updateBooksAlternateSeries(books, inv, overwrite):
+    #update books
+	for book in books:
+		storyarc = ""
+		arcsFound = 0
+		splitTitle = book.title.split(";")
+		for title in splitTitle:
+			strippedTitle = stripTitle(title)
+			if strippedTitle in inv:
+				arcsFound += 1
+				storyarc = inv[strippedTitle]
+				ProcessAlternateSeries(book, title, storyarc, overwrite, config.settings["field"], arcsFound > 1)
 
-def ProcessAlternateSeries(book,storyarc,overwrite):
+def ProcessAlternateSeries(book,storyarcTitle,storyarc,overwrite,field,clearNumber):
 	# if there is an alternate series and it is the same as the storyarc name, set alternate series number
 	# find number after the groupkeyword, chapter/part number
+	# clearNumber is used when there are multiple AS for a book
+	# otherwise AS# will be set to part number for first SA detected
+
 	lstoryarc = storyarc.lower()
 	if book.alternateSeries is not None:
 		lAlternateSeries = book.alternateSeries.lower()
 	else:
 		lAlternateSeries = ""
 	#MessageBox.Show(lAlternateSeries.find(lstoryarc).ToString())
-	if lAlternateSeries.find(lstoryarc) != -1 and lstoryarc != lAlternateSeries:
-		RemoveStoryArcFromAlternateSeries(book,storyarc,overwrite)
-	if lstoryarc != lAlternateSeries:
-		if overwrite or book.storyArc is None:
-			if len(storyarc) > 0:
-				book.storyArc = storyarc
+	if field == "Story Arc":
+		if lAlternateSeries.find(lstoryarc) != -1 and lstoryarc != lAlternateSeries:
+			# story arc found in alt series, but there's more than just the SA in AS
+			RemoveStoryArcFromAlternateSeries(book,storyarc,overwrite)
+		if lstoryarc != lAlternateSeries:
+			if overwrite or book.storyArc is None:
+				if len(storyarc) > 0:
+					book.storyArc = storyarc
+		else:
+			#don't put found story arc in storyarc field since it is really an alternate series
+			AlternateSeriesNumberHandling(book,storyarcTitle,storyarc,overwrite)
+			if clearNumber:
+				book.alternateNumber = None
+
 	else:
-		#don't put found story arc in storyarc field since it is really an alternate series
-		#TODO: check title again for another story arc?
-		AlternateSeriesNumberHandling(book,storyarc,overwrite)
+		#save the found story arc in AlternateSeries
+		#possibilities
+		# SA IN AS // do nothing
+		# overwrite or empty AS //set and process number
+		if overwrite or book.alternateSeries is None:
+			if len(storyarc) > 0:
+				book.alternateSeries = storyarc
+		elif lAlternateSeries.find(lstoryarc) == -1:
+			# SA not in AS (not empty) // add to AS, no number
+			book.alternateSeries = book.alternateSeries + ', ' + storyarc
+
+		# SA == AS // process number
+		if len(storyarc) > 0:
+			if storyarc == book.alternateSeries:
+				AlternateSeriesNumberHandling(book,storyarcTitle,storyarc,overwrite)
+			if clearNumber:
+				book.alternateNumber = None
 
 #end ProcessAlternateSeries
+
 def RemoveStoryArcFromAlternateSeries(book,storyarc,overwrite):
 	#remove story arc from AlternateSeries, save it in story arc
 	#story arc could be one of several in AlternateSeries
 	if overwrite:
 		book.alternateSeries = book.alternateSeries.replace(storyarc,"").strip(' ,-(:;')
-		
-		
-		
-		#MessageBox.Show(re.sub(re.compile(re.escape(storyarc),re.I),"",book.alternateSeries,0))
-		
-	#MessageBox.Show(book.alternateSeries)
 #end RemoveStoryArcFromAlternateSeries
 
-def AlternateSeriesNumberHandling(book,storyarc,overwrite):
+def AlternateSeriesNumberHandling(book,storyarctitle,storyarc,overwrite):
 	#find a part number if it exists
 	if len(book.alternateSeries) > 0:
 		#remove story arc from title
-		PartNumber = book.title.replace(storyarc,"").strip().lstrip(',-(:;').strip()
+		PartNumber = storyarctitle.replace(storyarc,"").strip().lstrip(',-(:;').strip()
 		#MessageBox.Show(PartNumber)
-		#remove group keyword, if it exists find first word after it. 
-		for Part in GroupKeywords:
+		#remove group keyword, if it exists find first word after it.
+		for Part in getGroupKeywords():
 			PartNumber = PartNumber.replace("(" + Part, " ")
 			PartNumber = PartNumber.replace(Part, " ")
 		#take first word left, use that as part number
@@ -142,9 +178,16 @@ def text2int(textnum, numwords={}):
 			current = 0
 
 	return result + current
-	
 
 
+def remove_prefix(s, prefix):
+    return s[len(prefix):] if s.startswith(prefix) else s
+
+def stripTitle(title):
+	title = title.strip()
+	if config.settings["StripLeadingThe"] == 'True':
+		title = remove_prefix(title, "The ")
+	return title
 
 def makeTitleArray(books):
 	titleArray = []
@@ -152,11 +195,13 @@ def makeTitleArray(books):
 		#print "%s V%d #%s" % (book.Series , book.Volume , book.Number)
 		#print book.title
 		#print book.StoryArc
-		titleArray.append(book.title)
-	
-	print(titleArray)
-	
-	return titleArray		
+
+		#split titles on semicolon
+		splitTitle = book.title.split(";")
+		for	title in splitTitle:
+			titleArray.append(stripTitle(title))
+
+	return titleArray
 
 #http://stackoverflow.com/questions/2892931/longest-common-substring-from-more-than-two-strings-python
 # this does not increase asymptotical complexity
@@ -255,17 +300,15 @@ def formatDict(dictionary):
 		for item in v:
 			output += "\t   " + item + "\n"
 		output += "\n"
-	
+
 	return output
 
-	
-	
 def removeGroupKeywords(s):
 	processedString = s
-	for Part in GroupKeywords:
+	for Part in getGroupKeywords():
 		processedString = removePart(processedString,Part)
 	return processedString
-	
+
 def removePart(s,keyword):
 	#don't add spaces if already space in keyword
 	if keyword.find(" ") == -1:
@@ -278,14 +321,13 @@ def removePart(s,keyword):
 		NoPart = s
 	return NoPart
 
-	
 def removeGroupKeywordsAndAfter(s):
 	processedString = s
 	if s is not None:
-		for Part in GroupKeywords:
+		for Part in getGroupKeywords():
 			processedString = removePartAndAfter(processedString,Part)
 	return processedString
-	
+
 def removePartAndAfter(s,keyword):
 	#don't add spaces if already space in keyword
 	if keyword.find(" ") == -1:
@@ -298,15 +340,14 @@ def removePartAndAfter(s,keyword):
 		NoPart = s
 	return NoPart
 
-	
 def storyArc_cleanup(storyarc):
 	#print "StoryArc before clean up == |" + storyarc + "|"
-	#clean up possible StoryArc 
+	#clean up possible StoryArc
 	#remove left over "Part" from books like "Arc Part 1" "Arc Part 2"
-	for Part in GroupKeywords:
+	for Part in getGroupKeywords():
 		storyarc = storyarc.replace(" " + Part, "")
 		storyarc = storyarc.replace("(" + Part, "")
-	
+
 	#remove whitespace from start and end of string
 	storyarc = storyarc.strip()
 	

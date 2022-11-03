@@ -38,5 +38,23 @@ def main():
     else:
         print("Comic archive does not have metadata", file=sys.stderr)
 
+def SingleStoryArcFromTitle(metadata, overwrite = False):
+	config.LoadSettings()
+	books = []
+	books.append(metadata)
+	MultipleStoryArcsFromTitles(books,0)
+#end SingleStoryArcFromTitle
+
+def MultipleStoryArcsFromTitles(books,method_selected):
+	titleArray = makeTitleArray(books)
+	storyarcs = prefix_groups(titleArray,method_selected)
+
+	if storyarcs:
+		#invert dictionary, so book title is now the key, story arc the value
+		inv = InvertDictionary(storyarcs)
+		updateBooksAlternateSeries(books, inv, False)
+
+#end MultipleStoryArcsFromTitles
+
 if __name__ == '__main__':
     main()
