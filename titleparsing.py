@@ -1,9 +1,9 @@
-# Attempts to parse Titles to find Story Arc Info 
-# 
+# Attempts to parse Titles to find Story Arc Info
+#
 # You are free to modify and distribute this file
 ##########################################################################
 NoStoryArcKey = "---***No Story Arc Found***---"
-StoryArcMinimumLength = 6 # seems to be off by one... 
+StoryArcMinimumLength = 6 # seems to be off by one...
 SingleStoryArcMinimumLength = 2
 
 import config
@@ -133,21 +133,20 @@ def AlternateSeriesNumberHandling(book,storyarctitle,storyarc,overwrite):
 			PartNumber = PartNumber[:PartNumber.find(" ")]
 		PartNumber = PartNumber.strip(',-(:;').strip()
 		#MessageBox.Show("Alternate Series:\n" + book.alternateSeries + " #" + PartNumber)
-		
+
 		if overwrite or book.alternateNumber is None or len(book.alternateNumber) == 0:
 			#convert to integer, if error just use text
 			try:
 				book.alternateNumber = str(text2int(PartNumber))
 			except Exception:
 				book.alternateNumber = PartNumber
-	
-				
-#end AlternateSeriesNumberHandling
 
+
+#end AlternateSeriesNumberHandling
 
 def text2int(textnum, numwords={}):
 	textnum = textnum.lower()
-	
+
 	if not numwords:
 		units = [
 		"zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
@@ -224,30 +223,30 @@ def long_substr(strings):
 			if all(candidate.lower() in text.lower() for text in strings):
 				substr = candidate
 	return substr
-	
+
 def prefix_groups(data,method):
 	"""Return a dictionary of {prefix:[items]}."""
 	lines = data[:]
 	groups = dict()
 	groups[NoStoryArcKey] = list()
-	
-	
+
+
 	if method == 0:
 		#remove part and everything after it from title
-		removeP = removeGroupKeywordsAndAfter 
+		removeP = removeGroupKeywordsAndAfter
 	elif method == 1:
 		#use alternate Part removal, only remove the word Part from Title
 		removeP = removeGroupKeywords
 	else:
 		#shouldn't call if method is not 0 or 1
 		return
-		
-				
+
+
 	while lines:
 		longest = None
 		first = lines.pop()
-		
-		
+
+
 		firstNoPart = removeP(first)
 
 		for line in lines:
@@ -276,7 +275,7 @@ def prefix_groups(data,method):
 			#raise IndexError("No prefix match for {}!".format(first))
 			#print "no Story Arc found for " + first
 			#groups[NoStoryArcKey].append(first)
-			
+
 			#TODO: do single title check for possible story arc
 			single = SingleStoryArcFromTitleArray([first])
 			if len(single) == 0:
@@ -291,7 +290,6 @@ def prefix_groups(data,method):
 	if len(groups[NoStoryArcKey]) == 0:
 		del groups[NoStoryArcKey]
 	return groups
-
 
 def formatDict(dictionary):
 	output = ""
@@ -350,13 +348,13 @@ def storyArc_cleanup(storyarc):
 
 	#remove whitespace from start and end of string
 	storyarc = storyarc.strip()
-	
+
 	#remove trailing commas - and ( :
 	storyarc = storyarc.rstrip(',-(:')
-	
+
 	#remove semi-colon. Used as Story title delimiter
 	storyarc = storyarc.strip(';')
-	
+
 	#remove whitespace from start and end of string, again
 	storyarc = storyarc.strip()
 	#print "StoryArc after clean up == |" + storyarc + "|"
