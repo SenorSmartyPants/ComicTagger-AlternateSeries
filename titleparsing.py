@@ -172,9 +172,9 @@ def long_substr(strings):
 	reference = shortest_of(strings) #strings[0]
 	length = len(reference)
 	#find a suitable slice i:j
-	for i in xrange(length):
+	for i in range(length):
 		#only consider strings long at least len(substr) + 1
-		for j in xrange(i + len(substr) + 1, length + 1):
+		for j in range(i + len(substr) + 1, length + 1):
 			candidate = reference[i:j]  # is the slice recalculated every time?
 			if all(candidate.lower() in text.lower() for text in strings):
 				substr = candidate
