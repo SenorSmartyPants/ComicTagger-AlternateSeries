@@ -9,7 +9,7 @@ SingleStoryArcMinimumLength = 2
 import config
 
 def getGroupKeywords():
-	GroupKeywords = ["Part","Chapter","Pt.","Pt","Prelude","Conclusion"]
+	GroupKeywords = ["Part","Chapter","Pt.","Pt"," Prelude"," Conclusion"," Finale"]
 	GroupKeywordColon = ": "
 
 	if config.settings["GroupKeywordColon"] == 'True':
@@ -91,7 +91,7 @@ def ProcessAlternateSeries(book,storyarcTitle,storyarc,overwrite,field,clearNumb
 		#possibilities
 		# SA IN AS // do nothing
 		# overwrite or empty AS //set and process number
-		if overwrite or book.alternateSeries is None:
+		if (overwrite and not clearNumber) or book.alternateSeries is None:
 			if len(storyarc) > 0:
 				book.alternateSeries = storyarc
 		elif lAlternateSeries.find(lstoryarc) == -1:
